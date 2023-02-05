@@ -13,3 +13,26 @@ The reason this errors occurs is because Ubuntu 22.04 LTS uses iptables-nft by d
 Run sudo update-alternatives --config iptables
 Enter 1 to select iptables-legacy
 Now run sudo service docker start, and Docker will start as expected!
+
+For network issu follow this step (https://github.com/docker/for-linux/issues/1105) detailled below
+If you run Debian try:
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+
+ensure that /etc/sysctl.conf includes:
+net.ipv4.ip_forward = 1
+
+Third guess: Are you using openvpn?
+If so, create the bridge yourself:
+`sudo apt-get install bridge-utils
+
+sudo brctl addbr docker0
+
+sudo ip addr add 10.1.0.1/24 dev docker0
+
+sudo ip link set dev docker0 up
+
+ip addr show docker0
+
+sudo systemctl restart docker
+
+sudo iptables -t nat -L -n`
